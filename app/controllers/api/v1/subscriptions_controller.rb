@@ -1,4 +1,4 @@
-class Api::V1::SubscriptionController < ApplicationController
+class Api::V1::SubscriptionsController < ApplicationController
   def index
     customer = Customer.find(params[:customer_id])
     subscriptions = customer.subscriptions
@@ -6,8 +6,7 @@ class Api::V1::SubscriptionController < ApplicationController
   end
   def create
     customer = Customer.find(params[:customer_id])
-    tea = Tea.find(params[:tea_id])
-    subscription = customer.subscriptions.create(tea: tea, title: tea.title, price: params[:price], frequency: params[:frequency])
+    subscription = customer.subscriptions.new(subscription_params)
 
     if subscription.save
       render json: subscription, status: 200
@@ -18,10 +17,14 @@ class Api::V1::SubscriptionController < ApplicationController
 
   def update
     subscription = Subscription.find(params[:id])
-    if subscription.update(status: :cancelled)
+    if subscription.update(status: :disabled)
       render json: subscription, status: 200
     else
       render json: { error: "Failed to cancel subscription" }, status: 400
     end
+  end
+
+  def subscription_params
+    params.require(:subscription).permit(:tea_id, :sub_name, :price, :frequency)
   end
 end
